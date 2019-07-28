@@ -9,7 +9,7 @@ import glob
 
 coco = []        # COCO images
 images = []      # images with the right size
-size = 400       # size threshold
+size = 360       # size threshold
 
 for img_name in glob.glob("coco/*.jpg"):
 	img = np.asarray(Image.open(img_name))
