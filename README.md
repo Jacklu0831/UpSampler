@@ -1,5 +1,7 @@
 # SRGAN and Applications
 
+(plan to use it for improving stuff like facial recognition and object detection but need to wait for GPU to stop first)
+
 Implemented a Photo-Realistic Single Image Super-Resolution Generative Adversial Network (Tensorflow, Keras) that maps (64, 64, 3) image to (256, 256, 3). Trained it on Google Colab and used the COCO 2017 dataset. The SRGAN network learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details. Basically, I built and trained a deep neural network that asks for a video or image, then give me back a clearer version of it. 
 
 Check parameters.txt for the (hyper)parameters I used for training. Google Colab provided me with Tesla K80 GPU. At 2.18 min/epoch for 500 epochs, the total training time is around 18 hours. I highly recommand increasing the batch size if you have access to stronger GPUs. If you notice that the SRGAN.ipynb has quite a lot of functional programming, it because I originally implemented this project in python scripts but moved everything to Colab for more convenience and visualizing images.
@@ -14,7 +16,7 @@ Invented by Ian GoodFellow in 2014, GAN showed amazing image generative abilitie
 
 **Neural Network Architecture**
 
-<p align="center"><image src="assets/architecture"></image></p>
+<p align="center"><image src="assets/architecture.png"></image></p>
 
 The architecture of SRGAN is quite simple
 1. High resolution (HR) ground truth images are selected from the training set
@@ -25,13 +27,13 @@ The architecture of SRGAN is quite simple
 
 **Generator**
 
-<p align="center"><image src="assets/architecture"></image></p>
+<p align="center"><image src="assets/generator.png"></image></p>
 
 The generator takes a LR image, process it with a conv and a PReLU (trainable LReLU) layer, puts it through 16 [residual blocks](https://towardsdatascience.com/residual-blocks-building-blocks-of-resnet-fd90ca15d6ec) borrowed from SRResNet, upsamples by factor of 2 twice, and puts it through one last conv layer to produce the SR image.  
 
 **Discriminator**
 
-<p align="center"><image src="assets/generator"></image></p>
+<p align="center"><image src="assets/discriminator.png"></image></p>
 
 The discriminator is similar to a normal image classifier, except its task is now more daunting due to having to classify two images with near identical content (if the generator is trained well enough). It puts HR/SR images first through a conv and a LReLU layer, process the image through 7 conv-BN-LReLU blocks, flatten the image, then use two dense layers with a LReLU in middle and a sigmoid function at the end for binary classification. 
 
@@ -41,28 +43,28 @@ At first I thought despite identity mapping, 16 Residual layers (generator) and 
 
 **Loss Function**
 
-<p align="center"><image src="assets/goal"></image></p>
+<p align="center"><image src="assets/goal.png" height="50%" width="50%"></image></p>
 
 This equation above describes the goal of SRGAN - to find the generator weights/parameters that minimize the perceptual loss function averaged over a number of images. On the right side of the equation inside the summation, the perceptual loss function takes two arguments - a generated SR image by putting an LR image into the generator function, and the ground truth HR image. 
 
-<p align="center"><image src="assets/gan_loss"></image></p>
+<p align="center"><image src="assets/gan_loss.png" height="40%" width="40%"></image></p>
 
 One of the major advantage DNN approach has over other numerical techniques for single image super resolution is having the perceptual loss function for backpropagation. Let's break it down. It adds the content loss and 0.001 of the adversial loss together and minimize them. 
 
 <table align="center">
   <tr>
     <th>
-        <p align="center"><image src="assets/perceptual_loss"></image></p>
+        <p align="center"><image src="assets/perceptual_loss.png" height="105" width="1000"></image></p>
     </th>
     <th>
-        <p align="center"><image src="assets/feature"></image></p>
+        <p align="center"><image src="assets/feature.png" height="225" width=1300"></image></p>
     </th>
   </tr>
 </table>
 
 Content loss refers to the loss of perceptual similarity between the SR and HR images. For many years people use MSE by default for this. However, minimizing MSE often produces blurry images, to computer the images might be similar, but human eyes extracts features from images instead of making pixel-wise calculations. Therefore, I used the VGG19 network for feature extraction, then took the MSE of the extracted features instead. 
 
-<p align="center"><image src="assets/adv_loss"></image></p>
+<p align="center"><image src="assets/adv_loss.png" height="40%" width="40%"></image></p>
 
 Adversarial loss uses the classification results to calculate the loss of the generator. The formula is close but not identical to binary cross entropy for better gradient behavior. Instead, I used binary cross entropy but tweaked the label value of SR images from 0 to a normal distribution around 0.1 to achieve the same effect.
 
