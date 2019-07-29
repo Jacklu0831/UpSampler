@@ -1,6 +1,6 @@
 # SRGAN and Applications
 
-**NOTE** - Below are some results produced in between epochs. I also to see if it helps with object detection and facial recognition, these applications will likely come later.
+**NOTE** - Below are some results produced in between epochs but the model is still under training. I also plan to see if it helps with object detection and facial recognition, these applications will likely come later. 
 
 <p align="center">
   <b>&emsp;&emsp;&emsp;Input (LR)&emsp;&emsp;&emsp;&emsp;Output (SR)&emsp;&emsp;Ground Truth (HR)</b>
