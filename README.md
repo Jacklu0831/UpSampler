@@ -3,13 +3,13 @@
 **NOTE** - Below are some results produced in between epochs but the model is still under training. I also plan to see if it helps with object detection and facial recognition, these applications will likely come later. 
 
 <p align="center">
-  <b>&emsp;&emsp;&emsp;Input (LR)&emsp;&emsp;&emsp;&emsp;Output (SR)&emsp;&emsp;Ground Truth (HR)</b>
+  <b>&emsp;&emsp;Input (LR)&emsp;&emsp;&emsp;&emsp;Output (SR)&emsp;&emsp;&emsp;&emsp;&emsp;Ground Truth (HR)</b>
   <br>
-  <image src="assets/result_236.png" height="50%" width="50%"></image>
-  <image src="assets/result_245.png" height="50%" width="50%"></image>
-  <image src="assets/result_255.png" height="50%" width="50%"></image>
-  <image src="assets/result_261.png" height="50%" width="50%"></image>
-  <image src="assets/result_266.png" height="50%" width="50%"></image>
+  <image src="assets/result_236.png" height="70%" width="70%"></image>
+  <image src="assets/result_245.png" height="70%" width="70%"></image>
+  <image src="assets/result_255.png" height="70%" width="70%"></image>
+  <image src="assets/result_261.png" height="70%" width="70%"></image>
+  <image src="assets/result_266.png" height="70%" width="70%"></image>
 </p>
 
 Implemented a Photo-Realistic Single Image Super-Resolution Generative Adversial Network (Tensorflow, Keras) that maps (64, 64, 3) image to (256, 256, 3). Trained it on Google Colab and used the COCO 2017 dataset. The SRGAN network learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details. Basically, I built and trained a deep neural network that asks for a video or image, then give me back a clearer version of it. 
