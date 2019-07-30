@@ -1,8 +1,22 @@
 # SRGAN
 
-(plan to use it for improving stuff like facial recognition and object detection but need to wait for GPU to stop first)
+**NOTE** - Below are some results produced in between epochs but the model is still under training. I also plan to see if it helps with object detection and facial recognition, these applications will likely come later. 
 
-Implemented a Photo-Realistic Single Image Super-Resolution Generative Adversial Network (Tensorflow, Keras) that maps (64, 64, 3) image to (256, 256, 3). Trained it on Google Colab and used the COCO 2017 dataset. The SRGAN network learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details. Basically, I built and trained a deep neural network that asks for a video or image, then give me back a clearer version of it. Also, this is not my first dip in GAN. For my previous work on Celebrity Face Generator and CycleGAN, visit [this repo](https://github.com\Jacklu0831/GAN-Projects). 
+<p align="center">
+  <b>&emsp;&emsp;Input (LR)&emsp;&emsp;&emsp;&emsp;Output (SR)&emsp;&emsp;&emsp;&emsp;&emsp;Ground Truth (HR)</b>
+  <br>
+  <image src="assets/result_236.png" height="70%" width="70%"></image>
+  <image src="assets/result_245.png" height="70%" width="70%"></image>
+  <image src="assets/result_255.png" height="70%" width="70%"></image>
+  <image src="assets/result_261.png" height="70%" width="70%"></image>
+  <image src="assets/result_266.png" height="70%" width="70%"></image>
+</p>
+
+Implemented a Photo-Realistic Single Image Super-Resolution Generative Adversial Network (Tensorflow, Keras) that maps (64, 64, 3) image to (256, 256, 3). Trained it on Google Colab and used the COCO 2017 dataset. The SRGAN network learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details. Basically, I built and trained a deep neural network that asks for a video or image, then give me back a clearer version of it. 
+
+Check parameters.txt for the (hyper)parameters I used for training. Google Colab provided me with Tesla T4 GPU. At 2.18 min/epoch for 500 epochs, the total training time is around 18 hours. I highly recommand increasing the batch size if you have access to stronger GPUs. If you notice that the SRGAN.ipynb has quite a lot of functional programming, it because I originally implemented this project in python scripts but moved everything to Colab for more convenience and visualizing images.
+
+This is not my first dip in GAN. For my previous work on Celebrity Face Generator and CycleGAN, visit [this repo](https://github.com\Jacklu0831/GAN-Projects).
 
 ---
 
