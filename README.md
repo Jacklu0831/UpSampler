@@ -1,12 +1,8 @@
-# SRGAN and Applications
+# SRGAN
 
 (plan to use it for improving stuff like facial recognition and object detection but need to wait for GPU to stop first)
 
-Implemented a Photo-Realistic Single Image Super-Resolution Generative Adversial Network (Tensorflow, Keras) that maps (64, 64, 3) image to (256, 256, 3). Trained it on Google Colab and used the COCO 2017 dataset. The SRGAN network learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details. Basically, I built and trained a deep neural network that asks for a video or image, then give me back a clearer version of it. 
-
-Check parameters.txt for the (hyper)parameters I used for training. Google Colab provided me with Tesla K80 GPU. At 2.18 min/epoch for 500 epochs, the total training time is around 18 hours. I highly recommand increasing the batch size if you have access to stronger GPUs. If you notice that the SRGAN.ipynb has quite a lot of functional programming, it because I originally implemented this project in python scripts but moved everything to Colab for more convenience and visualizing images.
-
-This is not my first dip in GAN. For my previous work on Celebrity Face Generator and CycleGAN, visit [this repo](https://github.com\Jacklu0831/GAN-Projects).
+Implemented a Photo-Realistic Single Image Super-Resolution Generative Adversial Network (Tensorflow, Keras) that maps (64, 64, 3) image to (256, 256, 3). Trained it on Google Colab and used the COCO 2017 dataset. The SRGAN network learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details. Basically, I built and trained a deep neural network that asks for a video or image, then give me back a clearer version of it. Also, this is not my first dip in GAN. For my previous work on Celebrity Face Generator and CycleGAN, visit [this repo](https://github.com\Jacklu0831/GAN-Projects). 
 
 ---
 
@@ -29,7 +25,7 @@ The architecture of SRGAN is quite simple
 
 <p align="center"><image src="assets/generator.png"></image></p>
 
-The generator takes a LR image, process it with a conv and a PReLU (trainable LReLU) layer, puts it through 16 [residual blocks](https://towardsdatascience.com/residual-blocks-building-blocks-of-resnet-fd90ca15d6ec) borrowed from SRResNet, upsamples by factor of 2 twice, and puts it through one last conv layer to produce the SR image.  
+The generator takes a LR image, process it with a conv and a PReLU (trainable LReLU) layer, puts it through 16 [residual blocks](https://towardsdatascience.com/residual-blocks-building-blocks-of-resnet-fd90ca15d6ec) borrowed from SRResNet, upsamples by factor of 2 twice, and puts it through one last conv layer to produce the SR image. Unlike normal convolutional layers, going crazy with the number of residual blocks is not prone to overfitting the dataset because of their ability of identity mapping when there is nothing to be learned. 
 
 **Discriminator**
 
@@ -72,18 +68,32 @@ Adversarial loss uses the classification results to calculate the loss of the ge
 
 ## Files
 
-- SRGAN.ipynb         - Google Colab (Jupyter Notebook) implementation
-- README.md           - `self`
-- loss.txt            - losses each epoch
-- assets              - images for README.md
-- model               - .h5 files of Generator and Discriminator
-- raw_data            - 1000 raw images from the COCO 2017 dataset
-- processed_data
-  - high_res_images   - 1000 preprocessed high resolution images
-  - low_res_images    - 1000 preprocessed low resolution images
-- output              - Bunch of images with the epoch number beside them
+- SRGAN_coco.ipynb                - Google Colab implementation (coco dataset)
+- SRGAN_coco_continue.ipynb       - Google Colab implementation (coco dataset restore model and continue training)
+- SRGAN_face.ipynb       		  - Google Colab implementation (CelebA/face dataset)
+- SRGAN_face_continue.ipynb       - Google Colab implementation (CelebA/face dataset restore model and continue training)
+- utils.py                        - keeps all of the preprocess and data operation functions
+- README.md                       - `self`
+- loss.txt                        - losses each epoch
+- parameters.txt                  - a list hyperparameters and other parameters I used
+- assets                          - images for README.md
+- model                           - .h5 files of Generator and Discriminator
+- raw_data                        - 1000 raw images from the COCO 2017 dataset
+- data.zip                        - proprocessed data from `utils.py` functions
+- output                          - Bunch of images with the epoch number beside them
+
+Since `SRGAN.ipynb` was getting way too long, I moved all the data preprocess and management functions into `utils.py` to emphasize more on the neural network in the notebook. Also, I ended up separating the process of data preparation and training by download the preprocessed data and uploading them to `SRGAN.ipynb` so you can just run it alone without any other files. 
+
+Google Colab provided me with Tesla K80 GPU. At 2.19 min/epoch on 800 training images for 500 epochs, the total training time was around 18.5 hours. I used batch size of 16 but I highly recommand at least increasing it to 32 if your hardware allows.
 
 ---
+
+## Problems Faced
+
+Note to self:
+slow GPU and low GPU storage (12gb), decrease size but train with more images on coco, train images from a specific domain for a specific task like faces. Also decreasing size -> increase batch size so more efficiency in general. eyes not properly detected. too much detail in image. dataset being too wild. Decrease face size to increase batch size.
+
+___
 
 ## Try it Yourself
 
@@ -94,7 +104,7 @@ Python 3.6, Tensorflow 1.12.0, Keras 2.2.4, numpy 1.15.0, matplotlib, Pillow, tq
 
 **Run**
 
-Simply open the SRGAN.ipynb file in Google Colab and run all. If error encountered, please notify me jacklu0831@gmail.com.
+Open the SRGAN.ipynb file, upload from local data.zip, select run all. If error encountered, please notify me jacklu0831@gmail.com.
 
 ---
 
