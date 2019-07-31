@@ -2,7 +2,7 @@
 
 **NOTE** - Below are some results produced in between epochs while the model is still under training on google colab. I also plan to see if it helps with object detection and facial recognition, these applications will likely come later. 
 
-<pre>                     Input (LR)              Output (SR)          Ground Truth (HR)</pre>
+<pre>                   Input (LR)           Output (SR)        Ground Truth (HR)</pre>
 
   
 <p align="center">
