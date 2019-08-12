@@ -9,9 +9,9 @@
   <image src="assets/result_266.png" height="70%" width="70%"></image>
 </p>
 
-Implemented a **Photo-Realistic Single Image Super-Resolution Generative Adversial Network** (Tensorflow, Keras) that maps (64, 64, 3) image to size (256, 256, 3) while keeping the texture and perceptual details. The same model was trained separately on the COCO 2017 dataset and CelebA dataset, this was done to investigate how training SRGAN on domain specific dataset (faces) improve its performance on the domain of images it was trained on. The SRGAN network learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details. Basically, I built and trained a deep neural network that asks for an image, then gives me back a clearer version of it. 
+Implemented a **Photo-Realistic Single Image Super-Resolution Generative Adversial Network** (Tensorflow, Keras) that maps (64, 64, 3) image to size (256, 256, 3) while keeping the texture and perceptual details. Two models with the same model configuration were trained separately on the COCO 2017 dataset and CelebA dataset, this was done to investigate how training SRGAN on domain specific dataset (faces) improve its performance on the domain of images it was trained on. The SRGAN network learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details. Basically, I built and trained a deep neural network that asks for an image, then gives me back a clearer version of it. 
 
-*GAN is hard to train, but SRGAN is even harder*. Google Colab provided me with free Tesla T4 GPU. However, even after decreasing the image size to free up storage and decreasing the training size to 2500 images, at 4+ min/epoch for 2500 epochs, the total training time was still more than a solid week for each of the COCO one and the face one. I highly recommend increasing the batch size and training size if you have access to stronger GPUs. For more details on the parameters I used, I made a pretty complete list of them in `parameters.txt`.
+*GAN is hard to train, but SRGAN is even harder*. Google Colab provided me with free Tesla T4 GPU. However, even after decreasing the image size to free up storage and decreasing the training size to 2000 images and testing size to 500 imagtes, at 4+ min/epoch for 2500 epochs, the total training time was still more than a solid week for each of the COCO one and the face one. I highly recommend increasing the batch size and training size if you have access to stronger GPUs. For more details on the parameters I used, I made a pretty complete list of them in `parameters.txt`.
 
 This is not really my first dip into GAN. For my previous work on making Celebrity Face Generator and seasonal CycleGAN, visit [this repo](https://github.com\Jacklu0831/GAN-Projects).
 
@@ -32,7 +32,7 @@ The high level architecture of SRGAN is quite simple
 4. The discriminator distinguishes the HR images (ground truth) and the SR images (fake)
 5. Backpropagate loss to train discriminator and generator
 
- ## Generator
+### Generator
 
 <p align="center"><image src="assets/generator.png"></image></p>
 
@@ -56,7 +56,7 @@ This equation above describes the goal of SRGAN - to find the generator weights/
 
 <p align="center"><image src="assets/gan_loss.png" height="40%" width="40%"></image></p>
 
-One of the major advantage DNN approach has over other numerical techniques for single image super resolution is having the perceptual loss function for backpropagation. Let's break it down. It adds the content loss and 0.001 of the adversial loss together and minimize them. 
+One of the major advantage DNN approach has over other numerical techniques for single image super resolution is using the perceptual loss function for backpropagation. Let's break it down. It adds the content loss and 0.001 of the adversial loss together and minimize them. 
 
 <table align="center">
   <tr>
@@ -77,38 +77,74 @@ Adversarial loss uses the classification results to calculate the loss of the ge
 
 ---
 
-## Files
+## My Experience
 
-> Code
-- SRGAN_coco.ipynb                - Google Colab implementation (coco dataset)
-- SRGAN_coco_continue.ipynb       - Google Colab implementation (coco dataset restore model and continue training)
-- SRGAN_face.ipynb       		      - Google Colab implementation (face dataset)
-- SRGAN_face_continue.ipynb       - Google Colab implementation (face dataset restore model and continue training)
-- SRGAN_test.py                   - Script for testing the trained models
-- utils.py                        - keeps all of the preprocess and data operation functions
+### Face Model vs. COCO Model
 
-> Others
-- README.md                       - self
-- loss.txt                        - losses components of each epoch
-- parameters.txt                  - a complete list of hyperparameters and other parameters I used
-- assets                          - images for README.md
-- model                           - .h5 files of the coco and face generators, discriminators not included due to being almost 300 MB
-- raw_data                        - 1000 raw images from the COCO 2017 dataset
-- data.zip                        - proprocessed data from utils.py functions
-- output                          - Bunch of images with the epoch number beside them
+The idea of training the first model on a general dataset and the second model on a more restricted domain of images to observe if performance difference exist on the selected domain of images for the second model came to me while reading the original SRGAN paper. Then I came across [this paper](https://arxiv.org/abs/1903.09922) and decided to try out training one model on COCO and another on only human faces (CelebA) for the same number of epochs with the same model configuration. Below are some results.
 
-Since `SRGAN.ipynb` was getting way too long, I moved all the data preprocess and management functions into `utils.py` to emphasize more on the neural network in the notebook. Also, I ended up separating the process of data preparation and training by download the preprocessed data and uploading them to `SRGAN.ipynb` so you can just run it alone without any other files. 
+[NEED UPDATE] 
 
-Google Colab provided me with Tesla K80 GPU. At 2.19 min/epoch on 800 training images for 500 epochs, the total training time was around 18.5 hours. I used batch size of 16 but I highly recommand at least increasing it to 32 if your hardware allows.
+### Problems Faced
+
+Below are the collection of problems I encountered chronologically and my solutions for them. Take it either as some problem-solving tips or just a rant. 
+
+**Problem 1: Learning Curve**
+
+Being one of the newer applications of GAN when GAN is one of the newer neural architecture in the first place, resources on SRGAN was limited for me to implement my own. Thankfully, the [original paper](https://arxiv.org/abs/1609.04802) was very pleasant to read. It also contained a bundle of well-made images/diagrams I can't help but to use in this README. I carefully read the paper and several blogs to make sure I fully understand all functions before coding.
+
+**Problem 2: Hardware**
+
+I am incredibly grateful to Google for making their internal cloud computing technology [Google Colab](https://colab.research.google.com/notebooks/welcome.ipynb#recent=true) free for all. However, the provided tesla T4 GPU was not quite powerful enough for training SRGAN. I lowered the originally intended LR and HR image sizes by a factor of 2 to allow for batch gradient descient. The training process failed multiple times due to the lack of computing power, GPU storage, and disconnection. However, these issues were resolved by decrease batch size, image sizes, manually uploading files from my local device, write outputs/models directly to my Google Drive every number of epochs, and having a separate file for continue training with saved models (see files section for more details). Persisting for 2500 epochs, I ended up learning so much more about using Google Colab and obtained great project results.
+
+**Problem 3: Slow Training**
+
+I carefully observed `face_loss.txt` and `coco_loss.txt` throughout the training process. The generator's perceptual loss steadily dereased throughout the 2500 epochs for both models. The good news is that it means the learning rate is not too big and the weights are indeed moving toward the Nash equilibrium. The bad news is that since the entire training took more than 2 weeks, it was difficult to know whether my hyperparameters were working, and each try means forfeiting a few days of training. [This blog](https://www.google.com/search?q=why+is+gan+hard+to+train&oq=why+is+gan+hard&aqs=chrome.0.69i59j69i60j69i57j0.1837j0j1&sourceid=chrome&ie=UTF-8) provides a nice explaination on why GAN is so hard to train compared to numerous other neural architectures.
+
+**Problem 4: Struggles with Details**
+
+I trained the first model on the COCO dataset and quickly noticed the issue of it performing atrociously with images with more details, which is because LR image not being able to capture the texture and perceptual details of its HR origin. Since human face is one of the most complex feature that can appear in a picture, I chose to train my second model completely on faces to observe how much I can push the performance on possibly the most complex features. Below is a side by Side comparison between the same model's performance on images with drastically different complexity.
+
+[insert side by side comparison between details and non-details]
+
+On the other hand, the model that is trained only face images were able to produce perceptually great faces by the 500th epoch. However, it struggled with the most detailed feature of human face, which are the eyes. Since the downsized images carry very less information for reconstructing the eyes of a person, it is mostly up to the generator for drawing on the eyes itself. Since eyes are actually very important for recognizing a face, I continuously trained the model and observed a gradually improvement in the generator's ability in reconstructing the eyes of people.
+
+[insert face images]
 
 ---
 
-## Problems Faced
+## Files
 
-Note to self:
-slow GPU and low GPU storage (12gb), decrease size but train with more images on coco, train images from a specific domain for a specific task like faces. Also decreasing size -> increase batch size so more efficiency in general. eyes not properly detected. too much detail in image. dataset being too wild. Decrease face size to increase batch size.
+> Code
 
-___
+<pre>
+- SRGAN_coco.ipynb            - Google Colab implementation (coco dataset)
+- SRGAN_coco_continue.ipynb   - Google Colab implementation (coco dataset restore model and continue training)
+- SRGAN_face.ipynb            - Google Colab implementation (face dataset)
+- SRGAN_face_continue.ipynb   - Google Colab implementation (face dataset restore model and continue training)
+- SRGAN_test.py               - script for testing the trained models
+- utils.py                    - some of image preprocess functions
+</pre>
+
+> Directories
+
+<pre>
+- assets                      - images for this README
+- datasets                    - 2500 images from each of the COCO dataset and CelebA dataset
+- final_models                - .h5 files of the coco and face generators, discriminators not included due to size (300+ MB)
+- losses                      - files containing complete information on the training loss of each epoch
+</pre>
+
+> Others
+
+<pre>
+- README.md                   - self
+- loss.txt                    - losses components of each epoch
+- parameters.txt              - a complete list of hyperparameters and other parameters I used
+- output                      - bunch of images with the epoch number beside them
+</pre>
+
+---
 
 ## Try it Yourself
 
@@ -132,3 +168,4 @@ Run script `SRGAN_test.py`, make sure image input and image output directories a
 - [Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network](https://arxiv.org/abs/1609.04802)
 - [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385)
 - [Identity Mappings in Deep Residual Networks](https://arxiv.org/abs/1603.05027)
+- [Why is GAN hard to train?](https://www.google.com/search?q=why+is+gan+hard+to+train&oq=why+is+gan+hard&aqs=chrome.0.69i59j69i60j69i57j0.1837j0j1&sourceid=chrome&ie=UTF-8)
