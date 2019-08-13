@@ -1,19 +1,46 @@
-# Photo-Realistic SISR GAN
+# Super Resolution GAN
 
-<pre>                      Input (LR)              Output (SR)           Ground Truth (HR)</pre>
+[table of contents that is soon to be made]
+
+Built and trained a Photo-Realistic Single Image Super-Resolution Generative Adversial Network with Tensorflow + Keras. The aim is to map 64x64 colored images to 256x256 while keeping the perceptual details and texture. The motivation behind this project is out of self-interest: I really liked a wallpaper for my phone but it had low resolution, so I thought some kind of fully-convolutional encoder-decoder network would work and found out a lot of people have already tried this problem.  the main source of knowledge came from [this paper](https://arxiv.org/abs/1609.04802). Despite not having compatible hardware for how expensive it is to train the model, I was able to achieve great results by choosing smaller images, tweaking the model configuration, and lowering the batch size. 
+
+## Brief Intro
+
+#### Stage 1 - Building, Training, Failing
+ 
+For the model architecture, I mainly constructed the model from the original paper and took some freedom with the number of residual blocks and the loss functions. A detailed explaination of the architecture components and how they come together is explained in the [Background Section](#Background-+-the-Math). 
+
+Even Ian GoodFellow's friends thought GAN was not feasible for train, but SRGAN is even harder once you take a look at its [architecture](#Neural-Network-Architecture). I am incredibly grateful to Google for making their internal cloud computing engine [Google Colab](https://colab.research.google.com/notebooks/welcome.ipynb#recent=true) free for all. However, even after decreasing the image size to free up storage and decreasing the training size to 2000 and testing size to 500 images, the provided T4 had to run at 4+ min/epoch for 2500 epochs, causing the total training time to be more than a week for each model. I highly recommend increasing the batch size and training size if you have access to stronger GPUs. For more details on the parameters I used, I made a pretty neat list of them in `parameters.txt`. I am quite fond of TF's format for model summary, so I put them into `model_summary.txt` to keep the notebook short.
+
+#### Stage 2 - Performance Analysis
+
+Two models with the same configuration were trained separately on the COCO dataset and the CelebA dataset, this was done to investigate how training SRGAN on domain specific dataset (faces) improve its performance on the domain of images it was trained on. The SRGAN network learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details. Basically, I built and trained a deep neural network that asks for an image, then gives me back a clearer version of it. 
+
+This is not really my first dip into GAN. For my previous work on making Celebrity Face Generator and seasonal CycleGAN, visit [this repo](https://github.com\Jacklu0831/GAN-Projects).
+
+---
+
+## Results
+
+Below are a few test results (more in `results` folder) from COCO and CelebA datasets.
+
+<pre> Low-Res Input      Super-Res Output        High-Res Ground Truth </pre>
+
+#### COCO Results
 
 <p align="center">
   <image src="assets/result_245.png" height="70%" width="70%"></image>
   <image src="assets/result_255.png" height="70%" width="70%"></image>
   <image src="assets/result_261.png" height="70%" width="70%"></image>
-  <image src="assets/result_266.png" height="70%" width="70%"></image>
 </p>
 
-Implemented a **Photo-Realistic Single Image Super-Resolution Generative Adversial Network** (Tensorflow, Keras) that maps (64, 64, 3) image to size (256, 256, 3) while keeping the texture and perceptual details. Two models with the same model configuration were trained separately on the COCO 2017 dataset and CelebA dataset, this was done to investigate how training SRGAN on domain specific dataset (faces) improve its performance on the domain of images it was trained on. The SRGAN network learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details. Basically, I built and trained a deep neural network that asks for an image, then gives me back a clearer version of it. 
+#### CelebA Results
 
-*GAN is hard to train, but SRGAN is even harder*. Google Colab provided me with free Tesla T4 GPU. However, even after decreasing the image size to free up storage and decreasing the training size to 2000 images and testing size to 500 imagtes, at 4+ min/epoch for 2500 epochs, the total training time was still more than a solid week for each of the COCO one and the face one. I highly recommend increasing the batch size and training size if you have access to stronger GPUs. For more details on the parameters I used, I made a pretty complete list of them in `parameters.txt`.
-
-This is not really my first dip into GAN. For my previous work on making Celebrity Face Generator and seasonal CycleGAN, visit [this repo](https://github.com\Jacklu0831/GAN-Projects).
+<p align="center">
+  <image src="assets/result_245.png" height="70%" width="70%"></image>
+  <image src="assets/result_255.png" height="70%" width="70%"></image>
+  <image src="assets/result_261.png" height="70%" width="70%"></image>
+</p>
 
 ---
 
@@ -21,7 +48,7 @@ This is not really my first dip into GAN. For my previous work on making Celebri
 
 Invented by Ian GoodFellow in 2014, GAN showed amazing image generative abilities from road scenes to faces. However, generating images out of random noise is only a fraction of its capability. From switching images between domains (CycleGAN) to music generation (MidiNet), the breadth of tasks GAN could take on is still being rapidly discovered. Image super resolution can be defined as increasing the size of small images while keeping the drop in quality to minimum, or restoring high resolution images from rich details obtained from low resolution images. It has its applications in the fields of surveillance, forensics, medical imaging, satellite imaging, and consumer photography. Below is my attempt in concisely explaining SRGAN from [this paper](https://arxiv.org/abs/1609.04802).
 
- ### Neural Network Architecture
+### Neural Network Architecture
 
 <p align="center"><image src="assets/architecture.png"></image></p>
 
