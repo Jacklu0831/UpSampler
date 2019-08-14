@@ -9,7 +9,7 @@ There is quite a lot to write about this project, you can use this table of cont
 Motivation:\
 > Super resolution has a wide application from satellite imaging to photography. However, the truth is I wanted to use an image for my phone's wallpaper but it had low resolution, so the idea of some kind of fully-convolutional encoder-decoder network came to me and of course, I found out a number of papers have already been published around this topic. With previous experience in implementing a CycleGAN and DCGAN ([first GANs](https://github.com\Jacklu0831/GAN-Projects)), I comprehended some relevant [resources](#Sources) then started this. 
 
-In summary, I built and trained a Photo-Realistic Single Image Super-Resolution Generative Adversial Network with Tensorflow + Keras. The aim is to map 64x64 colored images to 256x256 (factor of 4) while keeping the perceptual details and texture. The main source of knowledge came from [the original SRGAN paper](https://arxiv.org/abs/1609.04802) and [this analysis on the importance of dataset](https://arxiv.org/abs/1903.09922). Despite not having compatible hardware for the computational demanding models, I was able to achieve great [results](#Results) by choosing smaller images, tweaking the model configuration, and lowering the batch size. 
+In summary, I built and trained a Photo-Realistic Single Image Super-Resolution Generative Adversial Network with Tensorflow + Keras. The aim is to map 44x44 colored images to 176x176 (factor of 4) while keeping the perceptual details and texture. The main source of knowledge came from [the original SRGAN paper](https://arxiv.org/abs/1609.04802) and [this analysis on the importance of dataset](https://arxiv.org/abs/1903.09922). Despite not having compatible hardware for the computational demanding models, I was able to achieve great [results](#Results) by choosing smaller images, tweaking the model configuration, and lowering the batch size. 
 
 <p align="center"><image src=""></image></p>
 
@@ -49,7 +49,7 @@ The discriminator is similar to a normal image classifier, except its task is no
 
 ### Intuition
 
-At first I thought despite identity mapping, 16 Residual layers (generator) and 7 discriminator blocks (discriminator) was an overkill for small images with size of 256x256. However, it does make sense because the generator needs to learn the features of an image well enough to the point of producing a more detailed version of it. On the other hand, the discriminator has to classify two images with increasingly identical content. On top of all these, quoting Ian GoodFellow ([source podcast](https://www.youtube.com/watch?v=Z6rxFNMGdn0)):
+At first I thought despite identity mapping, 16 Residual layers (generator) and 7 discriminator blocks (discriminator) was an overkill for small images with size of 176x176. However, it does make sense because the generator needs to learn the features of an image well enough to the point of producing a more detailed version of it. On the other hand, the discriminator has to classify two images with increasingly identical content. On top of all these, quoting Ian GoodFellow ([source podcast](https://www.youtube.com/watch?v=Z6rxFNMGdn0)):
 
 > The way of building a generative model for GANs is we have a two-player game in the game theoretic sense and as the players of this game compete, one of them becomes able to generate realistic data. 
 
@@ -90,7 +90,7 @@ This section contains an overview of what I did, the problems I faced, and the s
 
 ### Stage 1 - Building
 
-Being one of the newer applications of GAN when GAN is one of the newer neural architecture in the first place, resources on SRGAN was limited. Thankfully, the [original paper](https://arxiv.org/abs/1609.04802) was very informative and was a pleasant read. For the model architecture, I mainly constructed the model from the original paper and experimented with the number of residual blocks and the loss functions. 
+Being one of the newer applications of GAN when GAN is one of the newer neural architecture in the first place, resources on SRGAN was limited. Thankfully, the [original paper](https://arxiv.org/abs/1609.04802) was very informative and was a pleasant read. For the model architecture, I mainly constructed the model from the original paper and experimented with the number of residual blocks and the loss functions (used BCE with tweaks). 
 
 Redirect to [Background Section](#Background-+-the-Math) for detailed explanation of the architecture components and how they come together with visuals. For details on the parameters I used, I made a pretty neat list of them in `parameters.txt`. I also am quite fond of TF's format for model summary, so I put them in `model_summary.txt` to keep the Jupyter/Colab notebooks short. 
 
@@ -189,7 +189,7 @@ Below are a few test results from COCO and CelebA datasets. More can be found in
 
 #### Dependencies
 
-Python 3.6, Tensorflow 1.12.0, Keras 2.2.4, numpy 1.15.0, matplotlib, Pillow, tqdm
+Python 3.7, Tensorflow 1.14.0, Keras 2.2.4, numpy 1.15.0, matplotlib, Pillow, tqdm, OpenCV (utils)
 
 #### Train
 
