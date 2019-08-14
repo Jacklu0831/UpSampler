@@ -1,14 +1,11 @@
-# python SRGAN_test.py -i i -o 1 -t 1
-
 """
-TYPE:
-
+OUTPUT TYPES
 1	SR
-2	LR-SR-HR
-3	COCO vs. FACE
-4   COCO vs. BICUBIC
-5	FACE vs. BICUBIC
-6	
+2	LR - SR - HR
+3	COCO - FACE
+4   FACE - BICUBIC
+5	COCO - BICUBIC
+6&7 LR - BICUBIC - COCO - FACE - HR
 """
 
 import argparse
@@ -49,104 +46,147 @@ def content_loss(y, y_pred):
 # get and process images
 def get_images():
 	for img_name in glob.glob(os.path.join(args["input"], "*.jpg")):
+		# HR
 		im = Image.open(img_name)
 		hr_ims.append(np.asarray(im))
-
+		# LR
 		im = np.asarray(im.resize((44, 44), Image.BICUBIC))
 		lr_ims.append(im)
-
+		# SR
 		im = np.divide(im.astype(np.float32), 127.5) - np.ones_like(im, dtype=np.float32)
 		im = np.expand_dims(im, axis=0)
 		im_f = np.asarray(g_1.predict(im))
 		im_f = ((im_f + 1) * 127.5).astype(np.uint8)
 		sr_ims.append(im_f[0])
-
-		# also do the same for coco model
-		if args["type"] == "3":
+		# SR, second model
+		if args["type"] == "3" or args["type"] == "6":
 			im_c = np.asarray(g_2.predict(im))
 			im_c = ((im_c + 1) * 127.5).astype(np.uint8)
 			sr_ims_2.append(im_c[0])		
 
-
-def plot_1_image():
+# 1
+def plot_sr():
 	for i in range(len(sr_ims)):
 		plt.imsave(os.path.join(args["output"], "{}.jpg".format(i+1)), sr_ims[i])
 
-def plot_3_image():
+# 2
+def plot_lr_sr_hr():
 	dim = (1, 3)
 	for i in range(len(sr_ims)):
-		plt.figure(figsize=(15, 5))
+		plt.figure(figsize=(15, 6))
 		plt.subplot(dim[0], dim[1], 1)
+		plt.title("LR", fontsize=16)
 		plt.imshow(lr_ims[i], interpolation="nearest")
 		plt.axis("off")
 		plt.subplot(dim[0], dim[1], 2)
+		plt.title("SR", fontsize=16)
 		plt.imshow(sr_ims[i], interpolation="nearest")
 		plt.axis("off")
 		plt.subplot(dim[0], dim[1], 3)
+		plt.title("HR", fontsize=16)
 		plt.imshow(hr_ims[i], interpolation="nearest")
 		plt.axis("off")
 		plt.tight_layout()
 		plt.savefig(os.path.join(args["output"], "{}.jpg".format(i+1)))
 		plt.close()
 
+# 3
 def plot_face_vs_coco():
-	dim = (1, 2)
+	dim = (1, 4)
 	for i in range(len(sr_ims)):
-		plt.figure(figsize=(10, 5))
+		plt.figure(figsize=(20, 6))
 		plt.subplot(dim[0], dim[1], 1)
-		plt.imshow(sr_ims_2[i], interpolation="nearest")
+		plt.title("LR", fontsize=16)
+		plt.imshow(lr_ims[i], interpolation="nearest")
 		plt.axis("off")
 		plt.subplot(dim[0], dim[1], 2)
+		plt.title("COCO", fontsize=16)
+		plt.imshow(sr_ims_2[i], interpolation="nearest")
+		plt.axis("off")
+		plt.subplot(dim[0], dim[1], 3)
+		plt.title("CelebA", fontsize=16)
 		plt.imshow(sr_ims[i], interpolation="nearest")
+		plt.axis("off")
+		plt.subplot(dim[0], dim[1], 4)
+		plt.title("HR", fontsize=16)
+		plt.imshow(hr_ims[i], interpolation="nearest")
 		plt.axis("off")
 		plt.tight_layout()
 		plt.savefig(os.path.join(args["output"], "{}.jpg".format(i+1)))
 		plt.close()
 
-# def plot_face_vs_coco():
-# 	dim = (1, 2)
-# 	for i in range(len(sr_ims)):
-# 		plt.figure(figsize=(10, 5))
-# 		plt.subplot(dim[0], dim[1], 1)
-# 		plt.imshow(sr_ims_2[i], interpolation="nearest")
-# 		plt.axis("off")
-# 		plt.subplot(dim[0], dim[1], 2)
-# 		plt.imshow(sr_ims[i], interpolation="nearest")
-# 		plt.axis("off")
-# 		plt.tight_layout()
-# 		plt.savefig(os.path.join(args["output"], "{}.jpg".format(i+1)))
-# 		plt.close()
+# 4, 5
+def plot_gan_vs_bicubic():
+	dim = (1, 4)
+	for i in range(len(sr_ims)):
+		plt.figure(figsize=(20, 6))
+		plt.subplot(dim[0], dim[1], 1)
+		plt.title("LR", fontsize=16)
+		plt.imshow(lr_ims[i], interpolation="nearest")
+		plt.axis("off")
+		plt.subplot(dim[0], dim[1], 2)
+		plt.title("BICUBIC", fontsize=16)
+		plt.imshow(lr_ims[i], interpolation="BICUBIC")
+		plt.axis("off")
+		plt.subplot(dim[0], dim[1], 3)
+		plt.title("CelebA" if args["type"] == "4" else "COCO", fontsize=16)
+		plt.imshow(sr_ims[i], interpolation="nearest")
+		plt.axis("off")
+		plt.subplot(dim[0], dim[1], 4)
+		plt.title("HR", fontsize=16)
+		plt.imshow(hr_ims[i], interpolation="nearest")
+		plt.axis("off")
+		plt.tight_layout()
+		plt.savefig(os.path.join(args["output"], "{}.jpg".format(i+1)))
+		plt.close()
 
-# def plot_face_vs_coco():
-# 	dim = (1, 2)
-# 	for i in range(len(sr_ims)):
-# 		plt.figure(figsize=(10, 5))
-# 		plt.subplot(dim[0], dim[1], 1)
-# 		plt.imshow(sr_ims_2[i], interpolation="nearest")
-# 		plt.axis("off")
-# 		plt.subplot(dim[0], dim[1], 2)
-# 		plt.imshow(sr_ims[i], interpolation="nearest")
-# 		plt.axis("off")
-# 		plt.tight_layout()
-# 		plt.savefig(os.path.join(args["output"], "{}.jpg".format(i+1)))
-# 		plt.close()
+# 6, 7
+def all():
+	dim = (1, 5)
+	for i in range(len(sr_ims)):
+		plt.figure(figsize=(25, 6))
+		plt.subplot(dim[0], dim[1], 1)
+		plt.title("LR", fontsize=16)
+		plt.imshow(lr_ims[i], interpolation="nearest")
+		plt.axis("off")
+		plt.subplot(dim[0], dim[1], 2)
+		plt.title("BICUBIC", fontsize=16)
+		plt.imshow(lr_ims[i], interpolation="BICUBIC")
+		plt.axis("off")
+		plt.subplot(dim[0], dim[1], 3)
+		plt.title("COCO", fontsize=16)
+		plt.imshow(sr_ims_2[i], interpolation="nearest")
+		plt.axis("off")
+		plt.subplot(dim[0], dim[1], 4)
+		plt.title("CelebA", fontsize=16)
+		plt.imshow(sr_ims[i], interpolation="nearest")
+		plt.axis("off")
+		plt.subplot(dim[0], dim[1], 5)
+		plt.title("HR", fontsize=16)
+		plt.imshow(hr_ims[i], interpolation="nearest")
+		plt.axis("off")
+		plt.tight_layout()
+		plt.savefig(os.path.join(args["output"], "{}.jpg".format(i+1)))
+		plt.close()
 
 
-g_1 = load_model(args["model1"], custom_objects={'content_loss': content_loss})
-if args["type"] == "3":
+if args["type"] == "1" or args["type"] == "2" or args["type"] == "4":
+	g_1 = load_model(args["model1"], custom_objects={'content_loss': content_loss})
+elif args["type"] == "3" or args["type"] == "6":
+	g_1 = load_model(args["model1"], custom_objects={'content_loss': content_loss})
 	g_2 = load_model(args["model2"], custom_objects={'content_loss': content_loss})
+elif args["type"] == "5":
+	g_1 = load_model(args["model2"], custom_objects={'content_loss': content_loss})
 
 get_images()
 
 if args["type"] == "1":
-	plot_1_image()
+	plot_sr()
 elif args["type"] == "2":
-	plot_3_image()
+	plot_lr_sr_hr()
 elif args["type"] == "3":
 	plot_face_vs_coco()
-elif args["type"] == "4":
-	plot_coco_vs_bicubic()
-elif args["type"] == "5":
-	plot_face_vs_bicubic()
-elif args["type"] == "6":
-	pass
+elif args["type"] == "4" or args["type"] == "5":
+	plot_gan_vs_bicubic()
+elif args["type"] == "6" or args["type"] == "7":
+	all()

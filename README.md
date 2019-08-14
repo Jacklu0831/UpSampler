@@ -88,13 +88,16 @@ Adversarial loss uses the classification results to calculate the loss of the ge
 
 This section contains an overview of what I did, the problems I faced, and the solutions for overcoming them.
 
-### Stage 1 - Building
+### Stage 1 - Preprocessing
+
+
+### Stage 2 - Building
 
 Being one of the newer applications of GAN when GAN is one of the newer neural architecture in the first place, resources on SRGAN was limited. Thankfully, the [original paper](https://arxiv.org/abs/1609.04802) was very informative and was a pleasant read. For the model architecture, I mainly constructed the model from the original paper and experimented with the number of residual blocks and the loss functions (used BCE with tweaks). 
 
 Redirect to [Background Section](#Background-+-the-Math) for detailed explanation of the architecture components and how they come together with visuals. For details on the parameters I used, I made a pretty neat list of them in `parameters.txt`. I also am quite fond of TF's format for model summary, so I put them in `model_summary.txt` to keep the Jupyter/Colab notebooks short. 
 
-### Stage 2 - Training
+### Stage 3 - Training
 
 > Ian GoodFellow himself would have thought GAN was infeasible partly due to the dual-network training expense if he was not drunk ([podcast](https://www.youtube.com/watch?v=Z6rxFNMGdn0) at around 27 mins), but my experience shows that SRGAN is even worse because of its heavy [architecture](#Neural-Network-Architecture). 
 
@@ -104,7 +107,7 @@ As for the time taken, even after decreasing the image size to free up storage a
 
 I carefully observed `face_loss.txt` and `coco_loss.txt` throughout the training process to make sure that both the generator and the discriminator to make sure that no one is dominating this zero-sum game. The generator's perceptual loss steadily dereased throughout the 2500 epochs for both models on COCO and CelebA. The good news is that it means the learning rate is not too big and the the model weights are indeed moving toward the Nash equilibrium. The bad news is that since the GPU is not very fast, it was difficult to know whether my hyperparameters were working, and each try means forfeitin up to days of training. [This blog](https://www.google.com/search?q=why+is+gan+hard+to+train&oq=why+is+gan+hard&aqs=chrome.0.69i59j69i60j69i57j0.1837j0j1&sourceid=chrome&ie=UTF-8) provides a nice explaination on why GAN is so hard to train compared to numerous other neural architectures.
 
-### Stage 3 - Performance Analysis
+### Stage 4 - Performance Analysis
 
 I trained the first model on the COCO dataset and quickly noticed the issue of it performing atrociously with images with more details, which is because LR image not being able to capture the texture and perceptual details of its HR origin. Since human face is one of the most complex feature that can appear in a picture, I chose to train my second model completely on faces to observe how much I can push the performance on possibly the most complex features. Below is a side by Side comparison between the same model's performance on images with drastically different complexity.
 
@@ -178,7 +181,6 @@ Below are a few test results from COCO and CelebA datasets. More can be found in
 
 <pre>
 - README.md                   - self
-- loss.txt                    - losses components of each epoch
 - parameters.txt              - a complete list of hyperparameters and other parameters I used
 - output                      - bunch of images with the epoch number beside them
 </pre>
