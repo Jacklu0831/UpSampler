@@ -1,6 +1,6 @@
 """
 OUTPUT TYPES
-1	SR
+1	Choose LR, SR or HR
 2	LR - SR - HR
 3	COCO - FACE
 4   FACE - BICUBIC
@@ -26,7 +26,6 @@ ap.add_argument("-m1", "--model1", default="face_g_model2500.h5", help="generato
 ap.add_argument("-m2", "--model2", default="coco_g_model2500.h5", help="generator model path (coco)")
 ap.add_argument("-t", "--type", required=True, help="type of output image")
 args = vars(ap.parse_args())
-
 
 hr_ims = []
 lr_ims = []
@@ -62,12 +61,19 @@ def get_images():
 		if args["type"] == "3" or args["type"] == "6":
 			im_c = np.asarray(g_2.predict(im))
 			im_c = ((im_c + 1) * 127.5).astype(np.uint8)
-			sr_ims_2.append(im_c[0])		
+			sr_ims_2.append(im_c[0])
 
 # 1
 def plot_sr():
-	for i in range(len(sr_ims)):
-		plt.imsave(os.path.join(args["output"], "{}.jpg".format(i+1)), sr_ims[i])
+	for i in range(len(sr_ims)/100):
+		# plt.imsave(os.path.join(args["output"], "{}.jpg".format(i+1)), sr_ims[i])
+		# plt.imsave(os.path.join(args["output"], "{}.jpg".format(i+1)), lr_ims[i])
+		plt.figure(figsize=(5, 5))
+		plt.imshow(lr_ims[i], interpolation="BICUBIC")
+		plt.axis("off")
+        plt.tight_layout()
+		plt.savefig(os.path.join(args["output"], "{}.jpg".format(i+1)))
+		plt.close()
 
 # 2
 def plot_lr_sr_hr():
@@ -170,6 +176,7 @@ def all():
 		plt.close()
 
 
+# load model based on types of operations
 if args["type"] == "1" or args["type"] == "2" or args["type"] == "4":
 	g_1 = load_model(args["model1"], custom_objects={'content_loss': content_loss})
 elif args["type"] == "3" or args["type"] == "6":
@@ -178,8 +185,10 @@ elif args["type"] == "3" or args["type"] == "6":
 elif args["type"] == "5":
 	g_1 = load_model(args["model2"], custom_objects={'content_loss': content_loss})
 
+# get and process images
 get_images()
 
+# call respective functions to create and save plots
 if args["type"] == "1":
 	plot_sr()
 elif args["type"] == "2":

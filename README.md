@@ -1,6 +1,6 @@
 # Super Resolution GAN
 
-There is quite a lot to write about this project, you can use this table of contents to navigate.
+There was too much to write about this project + investigation. You can navigate with this TOC.
 
 [table of contents that is soon to be made]
 
@@ -9,7 +9,7 @@ There is quite a lot to write about this project, you can use this table of cont
 Motivation:\
 > Super resolution has a wide application from satellite imaging to photography. However, the truth is I wanted to use an image for my phone's wallpaper but it had low resolution, so the idea of some kind of fully-convolutional encoder-decoder network came to me and of course, I found out a number of papers have already been published around this topic. With previous experience in implementing a CycleGAN and DCGAN ([first GANs](https://github.com\Jacklu0831/GAN-Projects)), I comprehended some relevant [resources](#Sources) then started this. 
 
-In summary, I built and trained a Photo-Realistic Single Image Super-Resolution Generative Adversial Network with Tensorflow + Keras. The aim is to map 44x44 colored images to 176x176 (factor of 4) while keeping the perceptual details and texture. The main source of knowledge came from [the original SRGAN paper](https://arxiv.org/abs/1609.04802) and [this analysis on the importance of dataset](https://arxiv.org/abs/1903.09922). Despite not having compatible hardware for the computational demanding models, I was able to achieve great [results](#Results) by choosing smaller images, tweaking the model configuration, and lowering the batch size. 
+In summary, I built and trained a Photo-Realistic Single Image Super-Resolution Generative Adversial Network with Tensorflow + Keras. The **stage 1** of this project was to map 44x44 colored images to 176x176 (upsampling factor of 4) while keeping the perceptual details and textures. The main source of knowledge came from [the original SRGAN paper](https://arxiv.org/abs/1609.04802) and [this analysis on the importance of dataset](https://arxiv.org/abs/1903.09922). Despite not having compatible hardware for the computational demanding models, I achieved great [results](#Results) by using smaller images, tweaking the model configuration, and lowering the batch size. The **stage 2** of this project is an investigation to answer my own question of "whether the variance of dataset matter". I trained two identical models separately on the COCO dataset and the CelebA dataset, then used visual results and Fréchet Inception Distance to both qualitatively and quantitatively demonstrate my findings. 
 
 <p align="center"><image src=""></image></p>
 
@@ -19,18 +19,18 @@ In summary, I built and trained a Photo-Realistic Single Image Super-Resolution 
 
 Invented by Ian GoodFellow in [2014](https://arxiv.org/abs/1406.2661), GAN showed amazing image generative abilities from road scenes to faces. However, generating images out of random noise is only a fraction of its capability. From switching images between domains (CycleGAN) to music generation (MidiNet), the breadth of tasks GAN could take on is still being rapidly discovered. 
 
-Image super resolution can be defined as increasing the size of small images while keeping the drop in quality to minimum, or restoring high resolution images from rich details obtained from low resolution images. Simply put, the SRGAN network learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details. It has applications in the fields of surveillance, forensics, medical imaging, satellite imaging, and consumer photography. 
+Image super resolution can be defined as increasing the size of small images while keeping the drop in quality to minimum, or restoring high resolution images from rich details obtained from low resolution images. Simply put, the SRGAN network learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details. It has applications in the fields of surveillance, forensics, medical imaging, satellite imaging, and consumer photography. Note that the SRGAN architecture implemented here is also later discovered to be useful for a variety of image augmentation tasks, such as image colorization and edge-to-photo demonstrated in [this paper](https://arxiv.org/abs/1903.09922).
 
-Below is my attempt to concisely explain SRGAN from [this paper](https://arxiv.org/abs/1609.04802). I collected some well-made images/diagrams from the paper and blogs for the visuals. 
+Below is my attempt to concisely explain everything about SRGAN. I collected some well-made images/diagrams from the [original publish](https://arxiv.org/abs/1609.04802) for the visuals. 
 
 ### Neural Network Architecture
 
 <p align="center"><image src="assets/architecture.png"></image></p>
 
-The high level architecture of SRGAN is quite simple, it closely resembles the vanilla GAN network and is also about reaching the [Nash Equilibrium in the zero-sum game])https://www.cs.toronto.edu/~duvenaud/courses/csc2541/slides/gan-foundations.pdf) between the generator and the discriminator.
+The high level architecture of SRGAN closely resembles the vanilla GAN architecture and is also about reaching the [Nash Equilibrium in a zero-sum game])https://www.cs.toronto.edu/~duvenaud/courses/csc2541/slides/gan-foundations.pdf) between the generator and the discriminator.
 
 1. High resolution (HR) ground truth images are selected from the training set
-2. Low resolution (LR) images corresponding to the HR images are created with bi-cubic downsampling 
+2. Low resolution (LR) images are created with bicubic downsampling 
 3. The generator upsamples the LR images to Super Resolution (SR) images to fool the discriminator
 4. The discriminator distinguishes the HR images (ground truth) and the SR images (output) to judge the generator
 5. Train discriminator and generator with backpropagation
@@ -122,7 +122,9 @@ On the other hand, the model that is trained only face images were able to produ
 
 > If I train model A with a variety of objects and model B with only one category/type of images (dataset with narrower domain), say cats. Would B perform better than A on cat images or is SRGAN only about recognizing small textures and edges as detailed as possible? 
 
-I asked this question on Quora and received no response :( and only later found out about [this paper](https://arxiv.org/abs/1903.09922), so I decided to clarify my own question through experimentation. I trained two models with the same configuration separately on the COCO dataset and the CelebA dataset for the same number of epochs, this was done to investigate how training SRGAN on a narrow domain of images (faces) improve its performance on the domain of images that it was trained on. 
+I asked this question on Quora and received no response :( and only later found out about [this paper](https://arxiv.org/abs/1903.09922), so I clarified my own question through experimentation. In the paper just mentioned, the researchers trained models on different categories of images (face, dining room, tower) to demonstrate that each model performs best on the category of images they were trained on with FID as the evaluation metric. However, my question was when model A gets trained on images with high variance (COCO) and model B gets trained with images in a narrower domain (CelebA), is there a performance difference between A and B evaluated on the images from the narrower domain. 
+
+Therefore, I trained two models with the same configuration separately on the COCO dataset and the CelebA dataset for the same number of epochs, this was done to investigate how training SRGAN on a narrow domain of images (faces) improve its performance on the domain of images that it was trained on. I also used FID to evaluate my models.
 
 [insert stuff about FID]
 [insert coco vs face]

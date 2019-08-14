@@ -7,6 +7,7 @@ from PIL import Image
 import cv2
 import glob
 from numpy import random
+import matplotlib.pyplot as plt
 
 coco = []        # COCO images
 images = []      # images with the right size
@@ -161,3 +162,24 @@ def download_local(dir):
 	# download output
 	!tar -czf output.tar.gz dir/output
 	files.download("output.tar.gz")
+
+
+"""
+Performance from FID.py:
+BICUBIC  50.112873
+COCO     11.100603
+CelebA   6.984465
+"""
+
+def plot_performance():
+    """Plot performance of different upsampling methods."""
+    objects = ('BICUBIC', 'COCO', 'CelebA')
+    y_pos = np.arange(len(objects))
+    performance = [50.11, 11.10, 6.98]
+
+    plt.bar(y_pos, performance, align='center', alpha=0.5)
+    plt.xticks(y_pos, objects)
+    plt.ylabel('Fréchet Inception Distance')
+    plt.title('Performance Evaluation with FID')
+    plt.savefig("performance.jpg")
+
