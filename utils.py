@@ -157,15 +157,15 @@ def load_train_data(dir=data_dir, num_img=num_images, split_ratio=split_ratio, h
 
 
 # def download_local(dir):
-    '''This function is only meant to be used for Jupyter Notebook / Colab'''
-    # !tar -czf archive.tar.gz dir/data_dir
-    # files.download("raw_data.tar.gz")
-    # !tar -czf archive.tar.gz dir/processed_data
-    # files.download("processed_data.tar.gz")
-    # !tar -czf model.tar.gz dir/model
-    # files.download("model.tar.gz")
-    # !tar -czf output.tar.gz dir/output
-    # files.download("output.tar.gz")
+#     '''This function is only meant to be used for Jupyter Notebook / Colab'''
+#     !tar -czf archive.tar.gz dir/data_dir
+#     files.download("raw_data.tar.gz")
+#     !tar -czf archive.tar.gz dir/processed_data
+#     files.download("processed_data.tar.gz")
+#     !tar -czf model.tar.gz dir/model
+#     files.download("model.tar.gz")
+#     !tar -czf output.tar.gz dir/output
+#     files.download("output.tar.gz")
 
 
 def plot_performance():
@@ -216,26 +216,3 @@ def plot_loss():
     plt.margins(x=0.005)
 
     plt.savefig("test.jpg")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

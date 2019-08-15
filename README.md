@@ -177,32 +177,32 @@ Below are a few test results from COCO and CelebA datasets. A few were included 
 
 ## Files
 
-#### Code
+#### Files
 
 <pre>
-- SRGAN_coco.ipynb            - Colab implementation (coco dataset)
-- SRGAN_coco_continue.ipynb   - Colab implementation (coco dataset restore model and continue training)
-- SRGAN_face.ipynb            - Colab implementation (face dataset)
-- SRGAN_face_continue.ipynb   - Colab implementation (face dataset restore model and continue training)
-- SRGAN_test.py               - script for testing the trained models with various types of inputs
-- Utils.py                    - some of image preprocess functions
+- SRGAN_coco.ipynb            - Colab implementation (COCO)
+- SRGAN_coco_continue.ipynb   - Colab implementation (COCO restore model and continue training)
+- SRGAN_face.ipynb            - Colab implementation (CelebA)
+- SRGAN_face_continue.ipynb   - Colab implementation (CelebA restore model and continue training)
+- SRGAN_test.py               - script for testing the trained models with various types of outputs
+- FID.py                      - script for calculating the Fréchet Inception Distance between 2 image distributions
+- Utils.py                    - miscellaneous functions for plotting performance, managing/process data, parsing loss files...
+- README.md                   - self
 </pre>
 
 #### Directories
 
 <pre>
 - assets                      - images for this README
-- datasets                    - 2500 images from each of the COCO dataset and CelebA dataset
-- final_models                - .h5 files of the coco and face generators, discriminators not included due to size (300+ MB)
-- losses                      - files containing complete information on the training loss of each epoch
-</pre>
-
-#### Others
-
-<pre>
-- README.md                   - self
-- parameters.txt              - a complete list of hyperparameters and other parameters I used
-- output                      - bunch of images with the epoch number beside them
+- input                       - train + test images from each of the COCO dataset and CelebA dataset
+- output                      - some randomly chosen results of the 2500 epoch generators on the test dataset
+	- CelebA                  - 20 CelebA results
+	- COCO                    - 20 COCO results
+- model                       - .h5 files of the COCO and CelebA generators (2500 epoch), discriminators not included (300+ MB)
+- loss                        - files containing complete information on the training loss of each epoch with plots
+- info                        - information about model configuration and parameters/hyperparameters
+	- parameters.txt          - a complete list of hyperparameters and other parameters I used
+	- model_summary.txt       - model configuration (output of TensorFlow summary())
 </pre>
 
 ---
@@ -211,23 +211,23 @@ Below are a few test results from COCO and CelebA datasets. A few were included 
 
 #### Dependencies
 
-- Jupyter Notebook (Conda virtual env preferred)
-- Python 3.7
-- Tensorflow 1.14.0
-- Keras 2.2.4, 
-- numpy 1.15.0 
+<pre>
+Necessary (not version specific)      Unnecessary
+- Notebook/Colab (virtual env)        - tqdm
+- Python 3.7                          - OpenCV (Utils.py)
+- Tensorflow 1.14.0					  - Pillow
+- Keras 2.2.4
+- numpy 1.15.0
 - matplotlib
-- Pillow
-- tqdm
-- OpenCV (utils)
+</pre>
 
 #### Train
 
-Open `SRGAN_coco.ipynb` or `SRGAN_face.ipynb`, upload `COCO.zip` or `CelebA.zip`, make sure path names are correct and `shift + enter` away. If you encounter any confusion, feel free to contact me [email](jacklu0831@gmail.com).
+Open `SRGAN_coco.ipynb` or `SRGAN_face.ipynb`, upload `COCO.zip` or `CelebA.zip`, make sure path names are correct and `shift + enter` away. If you encounter any confusion, feel free to shoot me an [email](jacklu0831@gmail.com).
 
 #### Try Your Own Images
 
-Run the script `SRGAN_test.py`. Make sure input and output directories and generator (`coco_g_model2500.h5` or `face_g_model2500.h5`) paths are correctly specified. There are quite a few types of outputs you can customize, read the top of the script file to know the ID of the output type you wish for.
+Run the script `SRGAN_test.py`. Make sure input and output directories and generator (`coco_g_model_2500.h5` or `face_g_model_2500.h5`) paths are correctly specified. There are quite a few types of outputs you can customize, read the top of the script file to know the ID of the output type you wish for.
 
 ---
 
