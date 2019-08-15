@@ -1,10 +1,37 @@
 # Super-Resolution-GAN
 
-There was a lot to write about this two stage project/investigation. You can navigate to specific sections with TOC.
+There was a lot to write about this two stage project/investigation. You can navigate to with TOC.
 
-[table of contents that is soon to be made]
+## Table of Contents
 
----
+* [Introduction](#introduction)
+   * [Motivation](#motivation)
+   * [Summary](#summary)
+* [Background](#background)
+   * [A Contemporary History Lesson](#a-contemporary-history-lesson)
+   * [Neural Network Architecture](#neural-network-architecture)
+   * [Generator](#generator)
+   * [Discriminator](#discriminator)
+   * [Intuition](#intuition)
+   * [Loss Function](#loss-function)
+* [Procedures and Challenges](#procedures-and-challenges)
+   * [Stage 1: Preprocessing](#stage-1---preprocessing)
+   * [Stage 2: Building](#stage-2---building)
+   * [Stage 3: Training](#stage-3---training)
+   * [Stage 4: Performance Analysis](#stage-4---performance-analysis)
+* [Results](#results)
+   * [COCO](#coco)
+   * [CelebA](#celeba)
+* [File Tree](#file-tree)
+   * [Files](#files)
+   * [Directories](#directories)
+* [Try it Yourself](#try-it-yourself)
+   * [Dependencies](#dependencies)
+   * [Train](#train)
+   * [Try Your Own Images](#try-your-own-images)
+* [Sources](#sources)
+   * [Papers](#papers)
+   * [Miscellaneous](#miscellaneous)
 
 ## Introduction
 
@@ -14,7 +41,7 @@ Super resolution imaging has a wide application from satellite imaging to photog
 ### Summary
 Overall, I built and trained a Photo-Realistic Single Image Super-Resolution Generative Adversial Network with Tensorflow + Keras and investigated the importance of the training dataset (using Fréchet Inception Distance as the evaluation metric). Being able to extract enough information from only 44x44 photos with complex geometry (human face) to realistic 176x176 portraits, the final model has surpassed human-level performance. 
 
-<p align="center"><image src="assets/CelebA_results/4.jpg"></image></p>
+<p align="center"><image src="assets/CelebA_results/3.jpg"></image></p>
 <pre>   LR (low-res)            Bicubic           SR (Model A)          SR (Model B)        HR (high-res) 
          |                     \___________________|___________________/                      | 
          |                                         |                                          | 
@@ -39,7 +66,7 @@ Below is my attempt to concisely explain everything about SRGAN with some images
 
 ### Neural Network Architecture
 
-<p align="center"><image src="assets/architecture.png"></image></p>
+<p align="center"><image src="assets/architecture.png" height="70%" width="70%"></image></p>
 
 GAN is an unsupervised ML algorithm that employs supervised learning for training the discriminator (most of the time BCE). The high level architecture of SRGAN closely resembles the vanilla GAN architecture and is also about reaching the [Nash Equilibrium in a zero-sum game](https://www.cs.toronto.edu/~duvenaud/courses/csc2541/slides/gan-foundations.pdf) between the generator and the discriminator. However, this is certainly not the only form GAN can take on, check out CycleGAN where 2 generators and 2 discrimintors are needed.
 
@@ -129,14 +156,14 @@ The functions for parsing `CelebA_loss.txt` and `COCO_loss.txt` from `loss` is i
 <p align="center"><b>Loss of Model A (COCO dataset)</b></p>
 <p align="center"><image src="assets/COCO_loss.jpg"></image></p>
 <pre>     _________________________________________________________/           \__________________________
-    /                                                 Expand epoch 1500 to 1750                      \
+    /                                                 Expand epoch 1500 - 1750                       \
 </pre>
 <p align="center"><image src="assets/COCO_loss_zoomed.jpg"></image></p>
 
 <p align="center"><b>Loss of Model B (CelebA dataset)</b></p>
 <p align="center"><image src="assets/CelebA_loss.jpg"></image></p>
 <pre>     _________________________________________________________/           \__________________________
-    /                                                 Expand epoch 1500 to 1750                      \
+    /                                                 Expand epoch 1500 - 1750                       \
 </pre>
 <p align="center"><image src="assets/CelebA_loss_zoomed.jpg"></image></p>
 
@@ -150,19 +177,22 @@ One more thing to notice is that the content loss of Model A was consistently ap
 
 **Model A (Trained on COCO)**
 
-I trained the Model A on the COCO dataset and quickly noticed the issue of it performing atrociously with details in images due to 44x44 image not capturing enough texture and perceptual details (fur, patterns, etc). Due to the fact that Human face is the most complex feature that can appear in a picture, Model A's performance on it is often absolutely atrocious. Since I already wanted to investigate whether how the variance of dataset affect a model's performance, I chose to train my second model completely on faces with the CelebA dataset to observe just how much I can push the generator to extract the complex features of human face packed inside a 44x44 image. 
+I trained the Model A on the COCO dataset and quickly noticed the issue of it performing badly with details in images due to 44x44 image not capturing enough texture and perceptual details (fur, patterns, etc). Due to the fact that Human face is the most complex feature that can appear in a picture, Model A's performance on it is often absolutely atrocious. Since I already wanted to investigate whether how the variance of dataset affect a model's performance, I chose to train my second model completely on faces with the CelebA dataset to observe just how much I can push the generator to extract the complex features of human face packed inside a 44x44 image. 
 
-Image with Details:
-<image src="assets/COCO_results/1.jpg"></image>
+Image with more details:
+<pre>   LR (low-res)            Bicubic           SR (Model A)          SR (Model B)        HR (high-res) </pre>
+<p align="center"><image src="assets/COCO_results/13.jpg"></image></p>
 
-Image with no details:
-<image src="assets/COCO_results/1.jpg"></image>
+Image with less details:
+<p align="center"><image src="assets/COCO_results/11.jpg"></image></p>
 
 **Model B (Trained on CelebA)**
 
 Model B was trained with only facial images and it already started producing realistic human faces by the 500th epoch thanks to the low variance of training content. However, it struggled with the most detailed but a very important feature of human face - the eyes. Since the downsized images compressed eyes into just few black pixels, reconstructing the eyes of people was virtually impossible. Gradually, the generator learned what eyes look like and "drew" them onto the black pixels, just like we would have dealt with this problem. Since the eyes are actually very important for recognizing a face, I continuously trained the model and observed a gradual improvement in the generator's ability in reconstructing/creating the eyes of people. 
 
-<image src="assets/CelebA_results/2.jpg"></image>
+The drawn-on eyes are too narrow:
+<pre>   LR (low-res)            Bicubic           SR (Model A)          SR (Model B)        HR (high-res) </pre>
+<p align="center"><image src="assets/CelebA_results/1.jpg"></image></p>
 
 Additionally, teeth gaps, heavy makeup, and creases have also been lost in when the HR images were downsized and caused similar troubles for the model. The struggles with these details can be traced back to not having more powerful hardware for processing bigger images and bicubic interpolation not being the optimal downsampling method for retaining perceptual information. 
 
@@ -175,13 +205,13 @@ I asked this question on Quora and received no response :( and only later found 
 My investigation for this stage of the project can be simply put as: 
 > If model A gets trained on images with a variety of contents (COCO) and model B gets trained with images in a specific domain of images (CelebA), how significant is the performance difference between A and B when evaluated on the images that model B was trained on?
 
-Therefore, I trained two models with the same configuration separately on the COCO dataset and the CelebA dataset for the same number of epochs, then used FID to evaluate my models. FID one of the most popular way to measure the performance of GAN and it compares the statistic of generated samples to real samples using the activations of an Inception-v3 network ([details](https://nealjean.com/ml/frechet-inception-distance/)). The actual math is not too bad as long as you know what matrix trace is. Since it is a "distance" measurement (multi-gaussian) between two images, **lower FID indicates better performance and vice versa**. Below is its formula.
+Therefore, I trained two models with the same configuration separately on the COCO dataset and the CelebA dataset for the same number of epochs, then used FID to evaluate my models. FID one of the most popular way to measure the performance of GAN and it compares the statistic of generated samples to real samples using the activations of an Inception-v3 network ([details](https://nealjean.com/ml/frechet-inception-distance/)). The actual math is not too bad as long as you know what matrix trace is. Since it is a "distance" measurement (multi-gaussian) between two images, **lower FID indicates better performance and vice versa**. 
 
-<image src="assets/FID.png"></image>
+<p align="center"><image src="assets/FID.png" width="60%" height="60%"></image></p>
 
 To measure the performance between bicubic upsampling (traditional method), model A, and model B on CelebA (the face images) test dataset (500 images), I first used the Pillow bicubic interpolation function and the two generators from both models to obtain three sets of super resolution images, then used the FID implementation **[from tsc2017](https://github.com/tsc2017/Frechet-Inception-Distance)** to measure their individual scores against the ground truth images to produce the bar graph below.
 
-<image src="assets/performance.jpg"></image>
+<p align="center"><image src="assets/performance.jpg" width="65%" height="65%"></image></p>
 
 The first thing to see here is that what a surprise, deep learning won against the traditional method. As could be seen among the [results](#Results), bicubic upsampling greatly smoothens the image by fitting the image with cubic splines, causing its output to be very blurry. Using a less model-based approach, the SRGAN networks let neurons in each layer learn the images and thus provide more flexibility when mapping the low resolution images to super resolution.
 
@@ -198,20 +228,21 @@ Side note
 Below are some test results from both the COCO and the CelebA datasets. A few were included in previous sections and more can be found in the `results` dir. Go to [this section](#Try-it-Yourself) to try your own images.
 
 ### COCO
-<pre>    Low-Res               Bicubic        Super-Res (Model A)  Super-Res (Model B)     High-Res GT </pre>
 
+<pre>   LR (low-res)            Bicubic           SR (Model A)          SR (Model B)        HR (high-res) </pre>
 <p align="center">
-  <image src="assets/CelebA_results/1.jpg"></image>
+  <image src="assets/CelebA_results/4.jpg"></image>
   <image src="assets/CelebA_results/2.jpg"></image>
-  <image src="assets/CelebA_results/3.jpg"></image>
+  <image src="assets/CelebA_results/7.jpg"></image>
 </p>
 
 ### CelebA
 
+<pre>   LR (low-res)            Bicubic           SR (Model A)          SR (Model B)        HR (high-res) </pre>
 <p align="center">
-  <image src="assets/COCO_results/1.jpg"></image>
+  <image src="assets/COCO_results/8.jpg"></image>
   <image src="assets/COCO_results/2.jpg"></image>
-  <image src="assets/COCO_results/3.jpg"></image>
+  <image src="assets/COCO_results/4.jpg"></image>
 </p>
 
 ---
