@@ -185,6 +185,7 @@ def plot_performance():
     plt.title('Performance Evaluation with FID')
     plt.savefig("performance.jpg")
 
+
 def parse_loss():
     f = open(face_loss, "r")
     text = f.read().split("\n")

@@ -4,25 +4,27 @@ There was a lot to write about this two stage project + investigation. You can n
 
 [table of contents that is soon to be made]
 
+---
+
 ## Intro
 
-Motivation\
-> Super resolution imaging has a wide application from satellite imaging to photography. However, the truth is I wanted to use an image as my mobile phone's wallpaper but it had low resolution, so the idea of some kind of fully-convolutional encoder-decoder network came to me and of course, I found out a number of papers have already been published around this topic. With previous experience in implementing CycleGAN and DCGAN ([GANs repo](https://github.com\Jacklu0831/GAN-Projects)), I comprehended some relevant [resources](#Sources), then started this project. 
+### Motivation
+Super resolution imaging has a wide application from satellite imaging to photography. However, the truth is I wanted to use an image as my mobile phone's wallpaper but it had low resolution, so the idea of some kind of fully-convolutional encoder-decoder network came to me and of course, I found out a number of papers have already been published around this topic. With previous experience in implementing CycleGAN and DCGAN ([GANs repo](https://github.com\Jacklu0831/GAN-Projects)), I comprehended some relevant [resources](#Sources), then started this project. 
 
+### Summary
 I built and trained a Photo-Realistic Single Image Super-Resolution Generative Adversial Network with Tensorflow + Keras and investigated the importance of the training dataset (using FID as the evaluation metric). Being able to extract enough information from only 44x44 photos with complex geometry (human face) to realistic 176x176 portraits, the final model has surpassed human-level performance. 
 
 <p align="center"><image src=""></image></p>
 
-The **stage 1** of this project was to map 44x44 colored images to 176x176 (upsampling factor of 4) while keeping the perceptual details and textures. The main source of knowledge came from the [original SRGAN paper](https://arxiv.org/abs/1609.04802) and [an analysis on the importance of dataset](https://arxiv.org/abs/1903.09922). Despite not having compatible hardware for the computational demanding models, I achieved great [results](#Results) by using smaller images, tweaking model configuration, and lowering batch size. I and my model found out the hard way that it was impossible for 44x44 images to capture the complexity of human face but the model persisted and pumped out visually convincing results. 
+**Stage 1** of this project was to map 44x44 colored images to 176x176 (upsampling factor of 4) while keeping the perceptual details and textures. The main source of knowledge came from the [original SRGAN paper](https://arxiv.org/abs/1609.04802) and [an analysis on the importance of dataset](https://arxiv.org/abs/1903.09922). Despite not having compatible hardware for the computational demanding models, I achieved great [results](#Results) by using smaller images, tweaking model configuration, and lowering batch size. I and my model found out the hard way that it was impossible for 44x44 images to capture the complexity of human face but the model persisted and pumped out visually convincing results. 
 
-The **stage 2** of this project is an investigation to answer my own question of "whether the variance of dataset matter". I trained two identical models separately on the COCO dataset (high content variance) and the CelebA dataset (specific category of content), then used visual results and Fréchet Inception Distance to both qualitatively and quantitatively demonstrate the results of my investigation. 
+**Stage 2** of this project was an investigation to answer my own question of "whether the variance of dataset matter". I trained two identical models separately on the COCO dataset (high content variance) and the CelebA dataset (specific category of content), then used visual results and Fréchet Inception Distance to both qualitatively and quantitatively demonstrate the results of my investigation. 
 
 ---
 
-## Background + the Math
+## Background
 
 ### A bit of History
-
 Invented by Ian GoodFellow in [2014](https://arxiv.org/abs/1406.2661), GAN showed amazing image generative abilities from road scenes to faces. However, generating images out of random noise is only a fraction of its capability. From switching images between domains (CycleGAN) to music generation (MidiNet), the breadth of tasks GAN could take on is still being rapidly discovered. 
 
 Single image super resolution (SISR) can be defined as upscaling images while keeping the drop in quality to minimum, or restoring high resolution images from details obtained from low resolution images. Traditionally, this was done with mostly bicubic interpolation ([great video explaining cubic spline](https://www.youtube.com/watch?v=poY_nGzEEWM)). However, interpolation has the tendency of making images [blurry and foggy](#Results). Utilizing deep learning techniques, the SRGAN learns a mapping from the low-resolution patch through a series of convolutional, fully-connected, and transposed/upsampling convolutional layers into the high-resolution patch while keeping texture/perceptual details and greatly [surpassed the performance of any traditional methods](#Results). It has applications in the fields of surveillance, forensics, medical imaging, satellite imaging, and consumer photography. The hereby implemented SRGAN's usage also include [image colorization and edge to photo mapping](https://arxiv.org/abs/1903.09922).
@@ -33,7 +35,7 @@ Below is my attempt to concisely explain everything about SRGAN with some images
 
 <p align="center"><image src="assets/architecture.png"></image></p>
 
-The high level architecture of SRGAN closely resembles the vanilla GAN architecture and is also about reaching the [Nash Equilibrium in a zero-sum game])https://www.cs.toronto.edu/~duvenaud/courses/csc2541/slides/gan-foundations.pdf) between the generator and the discriminator.
+The high level architecture of SRGAN closely resembles the vanilla GAN architecture and is also about reaching the [Nash Equilibrium in a zero-sum game](https://www.cs.toronto.edu/~duvenaud/courses/csc2541/slides/gan-foundations.pdf) between the generator and the discriminator.
 
 1. High resolution (HR) ground truth images get selected from the training set
 2. Low resolution (LR) images are created with bicubic downsampling 
@@ -54,7 +56,6 @@ The generator takes a LR image, process it with a conv and a PReLU (trainable LR
 The discriminator is similar to a normal image classifier, except its task is now more daunting due to having to classify two images with near identical content (if the generator is trained well enough). It puts HR/SR images first through a conv and a LReLU layer, process the image through 7 conv-BN-LReLU blocks, flatten the image, then use two dense layers with a LReLU in middle and a sigmoid function at the end for binary classification. 
 
 ### Intuition
-
 At first I thought despite identity mapping, 16 residual blocks and 7 discriminator blocks was an overkill to produce a 176x176 image. However, it does make sense because the generator needs to learn the features of an image well enough to the point of producing a more detailed version of it. On the other hand, the discriminator has to classify two images with increasingly identical content. On top of all these, quoting Ian GoodFellow ([source podcast](https://www.youtube.com/watch?v=Z6rxFNMGdn0)):
 
 > The way of building a generative model for GANs is we have a two-player game in the game theoretic sense and as the players of this game compete, one of them becomes able to generate realistic data. 
@@ -91,26 +92,22 @@ Adversarial loss uses the classification results to calculate the loss of the ge
 ---
 
 ## Procedures and Challenges
-
-This section contains an overview of what I did, the problems I faced, and my solutions for overcoming them or at least mitigate them. I'll be referencing the [background section](#Background-+-the-Math) quite a bit.
+This section contains an overview of what I did, the problems I faced, and my solutions for overcoming them or at least mitigate them. I'll be referencing the [background section](#Background) quite a bit.
 
 ### Stage 1 - Preprocessing
-
 Preprocessing images from the COCO and CelebA datasets contain identical steps. I randomly selected images from each dataset, **cropped the center out** of raw images to serve as the high resolution data (ground truth), **downsized** them with Pillow's built in **bicubic downsampling** method to serve as the low resolution data (input), and **normalized** them before feeding them into the model. The code for these are in the beginning of the notebooks and in `utils.py`.
 
 ### Stage 2 - Building
-
 Being one of the newer applications of GAN when GAN is one of the newer neural architecture in the first place, the number of papers and blogs on it were limited. Thankfully, the [original paper](https://arxiv.org/abs/1609.04802) was very informative and did not contain any steep learning curves. For the model architecture, I mainly constructed the model from the original paper and experimented with the number of residual blocks and the loss functions (I ended up using BCE and tweaking the label value). 
 
-Refer to the [background section](#Background-+-the-Math) for some detailed explanation of the architecture components and how they come together. For details on the parameters I used, I made a pretty neat list of them in `parameters.txt`. I also am quite fond of Keras' format for model summary especially compared to PyTorch's, I put the summaries in `model_summary.txt` to keep the notebooks short. 
+Refer to the [background section](#Background) for some detailed explanation of the architecture components and how they come together. For details on the parameters I used, I made a pretty neat list of them in `parameters.txt`. I also am quite fond of Keras' format for model summary especially compared to PyTorch's, I put the summaries in `model_summary.txt` to keep the notebooks short. 
 
 ### Stage 3 - Training
-
 > Even the creator of GAN, Ian Goodfellow himself would have thought of it as an infeasible idea due to having simultaneously training two networks if he was not drunk ([podcast](https://www.youtube.com/watch?v=Z6rxFNMGdn0), around 27 mins). Unfortunately, my experience showed that SRGAN is even worse because of its [heavy and complex model configuration](#Neural-Network-Architecture). 
 
 The actual training process failed multiple times due to the lack of computing power, GPU storage, and disconnection. These issues were resolved by:
 
-> Decreasing batch size, decreasing image sizes, uploading files from my local device, write outputs and models directly to Drive every few epochs, and having [a continue training file](#Files) with saved models (see files section for more details).
+> Decreasing batch size, decreasing image sizes, uploading files from my local device, write outputs and models directly to Drive every few epochs, and having [a continue training file](#File-Tree) with saved models (see files section for more details).
 
 This is one of the most problematic project and I ended up learning a lot more about using Cloud Computing in general and obtained great results. After decreasing the image size and the training size to 2500 images (train + test), the provided T4 GPU ran at 4+ min/epoch and the total training time was more than a week for each model (2500 epochs).
 
@@ -119,7 +116,6 @@ This is one of the most problematic project and I ended up learning a lot more a
 The script for parsing `face_loss.txt` and `coco_loss.txt` is inside `Utils.py`. I carefully observed the losses to ensure that neither the generator nor the discriminator is dominating the game. The generator loss steadily dereased throughout the 2500 epochs for both models trained on COCO and CelebA. Indicating that gradient descent is not overshooting and the the model weights are moving toward the Nash equilibrium. However, tuning hyperparameter was hard since each try forfeits days of training progress. [This blog](https://www.google.com/search?q=why+is+gan+hard+to+train&oq=why+is+gan+hard&aqs=chrome.0.69i59j69i60j69i57j0.1837j0j1&sourceid=chrome&ie=UTF-8) explains why GAN is harder to train than most other neural architectures.
 
 ### Stage 4 - Performance Analysis
-
 - Model A, trained on COCO
 
 I trained the first model on the COCO dataset and quickly noticed the issue of it performing atrociously with images with details due to 44x44 image not capturing the texture and perceptual details (fur, patterns...). Since human face is the most complex feature that can appear in a picture, Model A's performance on it is often absolutely atrocious. Since I already wanted to investigate whether how the variance of dataset affect a model's performance, I chose to train my second model completely on faces with the CelebA dataset to observe just how much I can push the generator to extract the complex feature of human face packed inside a 44x44 image. Below is a side by side comparison between the same model's performance on images with different complexity.
@@ -150,11 +146,9 @@ Final note: Despite that Model B was able to perform much better on the CelebA t
 ---
 
 ## Results
-
 Below are a few test results from COCO and CelebA datasets. A few were included in previous sections and more can be found in the `results` dir.
 
 ### COCO
-
 <pre>          Low-Res Input      Super-Res Output        High-Res Ground Truth </pre>
 
 <p align="center">
@@ -164,7 +158,6 @@ Below are a few test results from COCO and CelebA datasets. A few were included 
 </p>
 
 ### CelebA
-
 <pre>          Low-Res Input      Super-Res Output        High-Res Ground Truth </pre>
 
 <p align="center">
@@ -175,9 +168,9 @@ Below are a few test results from COCO and CelebA datasets. A few were included 
 
 ---
 
-## Files
+## File Tree
 
-#### Files
+### Files
 
 <pre>
 - SRGAN_coco.ipynb            - Colab implementation (COCO)
@@ -190,61 +183,67 @@ Below are a few test results from COCO and CelebA datasets. A few were included 
 - README.md                   - self
 </pre>
 
-#### Directories
+### Directories
 
 <pre>
 - assets                      - images for this README
 - input                       - train + test images from each of the COCO dataset and CelebA dataset
 - output                      - some randomly chosen results of the 2500 epoch generators on the test dataset
-	- CelebA                  - 20 CelebA results
-	- COCO                    - 20 COCO results
-- model                       - .h5 files of the COCO and CelebA generators (2500 epoch), discriminators not included (300+ MB)
+    - CelebA                  - 20 CelebA results
+    - COCO                    - 20 COCO results
+- model                       - .h5 files of the 2 generators, discriminators not included (300+ MB)
 - loss                        - files containing complete information on the training loss of each epoch with plots
 - info                        - information about model configuration and parameters/hyperparameters
-	- parameters.txt          - a complete list of hyperparameters and other parameters I used
-	- model_summary.txt       - model configuration (output of TensorFlow summary())
 </pre>
 
 ---
 
 ## Try it Yourself
 
-#### Dependencies
+### Dependencies
 
 <pre>
 Necessary (not version specific)      Unnecessary
 - Notebook/Colab (virtual env)        - tqdm
 - Python 3.7                          - OpenCV (Utils.py)
-- Tensorflow 1.14.0					  - Pillow
+- Tensorflow 1.14.0		      - Pillow
 - Keras 2.2.4
 - numpy 1.15.0
 - matplotlib
 </pre>
 
-#### Train
+### Train
 
-Open `SRGAN_coco.ipynb` or `SRGAN_face.ipynb`, upload `COCO.zip` or `CelebA.zip`, make sure path names are correct and `shift + enter` away. If you encounter any confusion, feel free to shoot me an [email](jacklu0831@gmail.com).
+Open `SRGAN_coco.ipynb` or `SRGAN_face.ipynb`, upload `COCO.zip` or `CelebA.zip`, make sure path names are correct and `shift + enter` away. If you encounter any confusion, feel free to shoot me an email.
 
-#### Try Your Own Images
+### Try Your Own Images
 
-Run the script `SRGAN_test.py`. Make sure input and output directories and generator (`coco_g_model_2500.h5` or `face_g_model_2500.h5`) paths are correctly specified. There are quite a few types of outputs you can customize, read the top of the script file to know the ID of the output type you wish for.
+Use the script `SRGAN_test.py`. Make sure input and output directories and generator (`coco_g_model_2500.h5` or `face_g_model_2500.h5`) paths are correctly specified. There are quite a few types of outputs you can customize, read the top of the script file to know the ID of the output type you wish for.
 
 ---
 
 ## Sources
 
-#### Papers
+### Papers
 
-- [Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network](https://arxiv.org/abs/1609.04802)
-- [SRGAN: Training Dataset Matters](https://arxiv.org/abs/1903.09922)
-- [General Adversarial Networks](https://arxiv.org/abs/1406.2661)
-- [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385)
-- [Identity Mappings in Deep Residual Networks](https://arxiv.org/abs/1603.05027)
+[Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network](https://arxiv.org/abs/1609.04802)
 
-#### Miscellaneous
+[SRGAN: Training Dataset Matters](https://arxiv.org/abs/1903.09922)
 
-- [Recent Conversation between Ian Goodfellow with Lex Fridman](https://www.youtube.com/watch?v=Z6rxFNMGdn0)
-- [Explanation of how simple bicubic interpolation is](https://www.youtube.com/watch?v=poY_nGzEEWM)
-- [Frétchet Inception Distance (mathematical)](https://nealjean.com/ml/frechet-inception-distance/)
-- [Why is GAN hard to train?](https://www.google.com/search?q=why+is+gan+hard+to+train&oq=why+is+gan+hard&aqs=chrome.0.69i59j69i60j69i57j0.1837j0j1&sourceid=chrome&ie=UTF-8)
-- [UofT Slide on GAN]((https://www.cs.toronto.edu/~duvenaud/courses/csc2541/slides/gan-foundations.pdf))
+[General Adversarial Networks](https://arxiv.org/abs/1406.2661)
+
+[Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385)
+
+[Identity Mappings in Deep Residual Networks](https://arxiv.org/abs/1603.05027)
+
+### Miscellaneous
+
+[Recent Conversation between Ian Goodfellow with Lex Fridman](https://www.youtube.com/watch?v=Z6rxFNMGdn0)
+
+[Explanation of how simple bicubic interpolation is](https://www.youtube.com/watch?v=poY_nGzEEWM)
+
+[Frétchet Inception Distance (mathematical)](https://nealjean.com/ml/frechet-inception-distance/)
+
+[Why is GAN hard to train?](https://medium.com/@jonathan_hui/gan-why-it-is-so-hard-to-train-generative-advisory-networks-819a86b3750b)
+
+[University of Toronto Slide on GAN](https://www.cs.toronto.edu/~duvenaud/courses/csc2541/slides/gan-foundations.pdf)
