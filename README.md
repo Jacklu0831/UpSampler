@@ -69,7 +69,7 @@ The equation above describes the goal of SRGAN - to find the generator weights/p
 
 <p align="center"><image src="assets/gan_loss.png" height="40%" width="40%"></image></p>
 
-One of the major advantage DNN approach has over other numerical techniques for single image super resolution is using the perceptual loss function for backpropagation. Let's break it down. It adds the content loss and 0.1% of the adversial loss together then minimize them. 
+One of the major advantage DNN approach has over other numerical techniques for single image super resolution is using the perceptual loss function for backpropagation. It adds the content loss and 0.1% of the adversial loss together then minimize them. Let's break it down.
 
 <table align="center">
   <tr>
@@ -82,7 +82,7 @@ One of the major advantage DNN approach has over other numerical techniques for 
   </tr>
 </table>
 
-Content loss refers to the loss of perceptual similarity between the SR and HR images. For many years people use MSE by default for this. However, minimizing MSE often produces blurry images as it is only based on pixel-to-pixel similarity, to computer the images might be similar, but human eyes extracts features from images instead of making pixel-wise calculations. Therefore, the original paper used the VGG19 network for feature extraction, then took the MSE of the extracted features instead. 
+Content loss refers to the loss of perceptual similarity between the SR and HR images. For many years people use MSE by default instead of this. However, minimizing MSE often produces blurry images as it is only based on pixel-to-pixel similarity, to computer the images might be similar, but human eyes extracts features from images instead of making pixel-wise calculations. Therefore, the original paper used the VGG19 network for feature extraction, then took the MSE of the extracted features instead. 
 
 <p align="center"><image src="assets/adv_loss.png" height="40%" width="40%"></image></p>
 
